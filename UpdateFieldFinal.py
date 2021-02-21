@@ -56,72 +56,74 @@ field_data = field_data.join(df, on='PLAYER')
 field_data = field_data.set_index('Index')
 
 field_data.to_csv('entryscores.csv')
-# field_data = field_data[field_data['status'] == 'available']
-# field_data[currentRound].replace(to_replace='--',value=0, inplace=True)
-# field_data[currentRound] = field_data[currentRound].astype('int64')
+field_data = field_data[field_data['status'] == 'available']
+field_data[currentRound].replace(to_replace='--',value=0, inplace=True)
+field_data[currentRound] = field_data[currentRound].astype('int64')
 
-# highScore = int(field_data[currentRound].max())
-# print(highScore)
+highScore = int(field_data[currentRound].max())
+print(highScore)
 
-# field_data[currentRound].replace(to_replace=0,value=highScore, inplace=True)
-
-
+field_data[currentRound].replace(to_replace=0,value=highScore, inplace=True)
 
 
-# airtableEntries = Airtable(base_key, entries_table, AIRTABLE_API_KEY)
-# entries = airtableEntries.get_all()
-# entries = pd.DataFrame.from_dict(entries)
 
-# entries_new= [0]*len(entries)
 
-# for (i, entry) in enumerate(entries_new):
-#     entry = entries.loc[i]['fields']
-#     entries_new[i] = entry
+airtableEntries = Airtable(base_key, entries_table, AIRTABLE_API_KEY)
+entries = airtableEntries.get_all()
+entries = pd.DataFrame.from_dict(entries)
 
-# entries_newDF = pd.DataFrame.from_dict(entries_new)
-# entries_newDF = entries_newDF.join(entries['id'])
-# scoreDF = [0]*len(entries_newDF)
+entries_new= [0]*len(entries)
 
-# entries_newDF.to_csv('entries.csv')
+for (i, entry) in enumerate(entries_new):
+    entry = entries.loc[i]['fields']
+    entries_new[i] = entry
 
-# for (i, team) in enumerate(scoreDF):  
-#     team = entries_newDF.loc[i]['entry']
-#     team=ast.literal_eval(team)
-#     teamPlayerNames = [0]*len(team)
-#     for(j, player) in enumerate(teamPlayerNames):
-#         player = team[j]
-#         player = int(player)+1
-#         player = int(field_data.loc[player][currentRound])
-#         teamPlayerNames[j] = player
-#     scoreDF[i]=teamPlayerNames
-# entries_newDF[currentRound]=scoreDF
+entries_newDF = pd.DataFrame.from_dict(entries_new)
+entries_newDF = entries_newDF.join(entries['id'])
+scoreDF = [0]*len(entries_newDF)
 
-# roundtotalDF = [0]*len(entries_newDF)
-# tournamentTotalDF = [0]*len(entries_newDF)
-# teamScoresDF = [0]*len(entries_newDF)
 
-# # print(entries_newDF)
-# for i in range(len(entries_newDF)):
-#     players = entries_newDF.loc[i]['PlayersNewIndex']
-#     players = ast.literal_eval(players)
-#     playerScores = entries_newDF.loc[i][currentRound]
-#     # print(players)
-#     # print(playerScores)
-#     entryscores = pd.DataFrame({'players': players, 'scores': playerScores})
-#     entryscores.sort_values(by='scores', inplace=True)
 
-#     # print(entryscores)
-#     scoringEntries = entryscores.nsmallest(4, 'scores')
-#     # print(scoringEntries)
-#     countedScores= scoringEntries['scores'].sum()
-#     teamScores = entryscores.to_json(orient='index')
+for (i, team) in enumerate(scoreDF):  
+    team = entries_newDF.loc[i]['entry']
+    team=ast.literal_eval(team)
+    teamPlayerNames = [0]*len(team)
+    for(j, player) in enumerate(teamPlayerNames):
+        player = team[j]
+        player = int(player)+1
+        player = int(field_data.loc[player][currentRound])
+        teamPlayerNames[j] = player
+    scoreDF[i]=teamPlayerNames
+entries_newDF[currentRound]=scoreDF
 
-#     # print(countedScores)
-#     roundtotalDF[i] = countedScores-(par * 4)
-#     teamScoresDF[i] = teamScores
+roundtotalDF = [0]*len(entries_newDF)
+tournamentTotalDF = [0]*len(entries_newDF)
+teamScoresDF = [0]*len(entries_newDF)
 
-# entries_newDF[currentRound+'Total']=roundtotalDF
-# entries_newDF[currentRound]= teamScoresDF
+# print(entries_newDF)
+for i in range(len(entries_newDF)):
+    players = entries_newDF.loc[i]['players']
+    players = ast.literal_eval(players)
+    playerScores = entries_newDF.loc[i][currentRound]
+    # print(players)
+    # print(playerScores)
+    entryscores = pd.DataFrame({'players': players, 'scores': playerScores})
+    entryscores.sort_values(by='scores', inplace=True)
+
+    # print(entryscores)
+    scoringEntries = entryscores.nsmallest(4, 'scores')
+    # print(scoringEntries)
+    countedScores= scoringEntries['scores'].sum()
+    teamScores = entryscores.to_json(orient='index')
+
+    # print(countedScores)
+    roundtotalDF[i] = countedScores-(par * 4)
+    teamScoresDF[i] = teamScores
+
+entries_newDF[currentRound+'Total']=roundtotalDF
+entries_newDF[currentRound]= teamScoresDF
+
+entries_newDF.to_csv('entries.csv')
 
 # for i in range(len(entries_newDF)):
 #     R1Total = entries_newDF.loc[i]['R1Total']
